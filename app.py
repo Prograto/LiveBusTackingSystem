@@ -13,9 +13,7 @@ def index():
 
 @app.route('/submit_location', methods=['POST'])
 def submit_location():
-    '''data = request.json
-    lat = data.get('latitude')
-    lng = data.get('longitude')'''
+    data = request.json
     lat = data.get('latitude')
     lng = data.get('longitude')
     timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
