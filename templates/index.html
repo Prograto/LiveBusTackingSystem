@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bus Route Tracker</title>
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <style>
+        #map { height: 80vh; width: 100%; margin-bottom: 10px; }
+        #info-box {
+            text-align: center;
+            font-size: 1.2em;
+            margin-top: 10px;
+            padding: 10px;
+            background: #f3f3f3;
+            border: 2px solid #007bff;
+            border-radius: 10px;
+            color: #333;
+        }
+        .leaflet-control-container .leaflet-control-attribution {
+            display: none !important;
+        }
+
+    </style>
+</head>
+<body>
+
+<h2 style="text-align:center; margin-top:20px;">🚌 Real-Time Bus Route Tracker</h2>
+
+<!-- Map Container -->
+<div id="map"></div>
+
+<!-- Info Box -->
+<div id="info-box">
+    <strong>📍 Current Location:</strong> <span id="location">Waiting for data...</span> <br/>
+    <strong>🌐 Latitude:</strong> <span id="lat">-</span>, <strong>Longitude:</strong> <span id="lng">-</span>
+</div>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+    const map = L.map('map').setView([0, 0], 15);
+    
+    // Add OpenStreetMap tiles
+    L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
+        attribution: '&copy; Chandusmarttechtuts'
+    }).addTo(map);
+
+    // Bus Icon
+    const busIcon = L.icon({
+        iconUrl: "{{ url_for('static', filename='images/bus.png') }}", 
+        iconSize: [20, 20],
+        iconAnchor: [10, 10],
+        popupAnchor: [0, -35]
+    });
+
+    let polyline = L.polyline([], { color: 'blue' }).addTo(map);
+    let marker;
+
+    // Function to update the map with new locations
+    async function updateMap() {
+        const response = await fetch('/get_locations');
+        const locations = await response.json();
+
+        if (locations.length > 0) {
+            const latlngs = locations.map(loc => [loc.lat, loc.lng]);
+            polyline.setLatLngs(latlngs);
+
+            const lastLocation = locations[locations.length - 1];
+            const lastLatLng = [lastLocation.lat, lastLocation.lng];
+
+            // Update marker position
+            if (marker) {
+                marker.setLatLng(lastLatLng);
+            } else {
+                marker = L.marker(lastLatLng, { icon: busIcon }).addTo(map);
+            }
+
+            map.setView(lastLatLng, 18, { animate: true });
+
+            // Update info box
+            document.getElementById('location').innerText = lastLocation.area;
+            document.getElementById('lat').innerText = lastLocation.lat;
+            document.getElementById('lng').innerText = lastLocation.lng;
+        }
+    }
+
+    // Update map every 3 seconds
+    setInterval(updateMap, 3000);
+</script>
+
+</body>
+</html>

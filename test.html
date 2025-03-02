@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bus Tracking with Leaflet.js</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <style>#map { height: 400px; }</style>
+</head>
+<body>
+    <div id="map"></div>
+
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script>
+        // Initialize map centered around a sample location
+        const map = L.map('map').setView([17.3850, 78.4867], 14);
+
+        // Load OpenStreetMap tiles
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19
+        }).addTo(map);
+
+        // Initialize marker and path
+        let busMarker = L.marker([17.3850, 78.4867]).addTo(map).bindPopup('Bus Location').openPopup();
+        let routePath = L.polyline([], { color: 'blue' }).addTo(map);
+
+        // Simulate GPS data (replace with real GPS updates)
+        const gpsCoordinates = [
+            [17.3850, 78.4867],
+            [17.3900, 78.4900],
+            [17.3950, 78.4950],
+            [17.4000, 78.5000]
+        ];
+
+        let index = 0;
+        setInterval(() => {
+            if (index < gpsCoordinates.length) {
+                const [lat, lng] = gpsCoordinates[index];
+                busMarker.setLatLng([lat, lng]);
+                routePath.addLatLng([lat, lng]);
+                map.panTo([lat, lng]);
+                index++;
+            }
+        }, 2000);
+    </script>
+</body>
+</html>
